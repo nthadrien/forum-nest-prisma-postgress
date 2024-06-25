@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  email       String   @unique
+  role        String   @default("moderator")
+  hash        String
+  description String?
+  online      Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // relationships
+  assignedSub SubForumAdmins[]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String
+  hash      String
+  online    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  profile   Profile?
+  warnings Int @default(0) 
+
+  postsReacted PostReaction[]
+  commentsReacted CommentReaction[]
+  posts       Post[]
+  comments    Comment[]
+}
+
+model Profile {
+  id      Int    @id @default(autoincrement())
+  aboutMe String
+  userId  Int    @unique
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model SubForumAdmins {
+  assignedAt    DateTime @default(now())
+  tasks         String
+  adminId       Int
+  administrator Admin    @relation(fields: [adminId], references: [id])
+  subForumId    Int
+  subForum      SubForum @relation(fields: [subForumId], references: [id])
+
+  @@id([adminId, subForumId])
+}
+
+model SubForum {
+  id          Int              @id @default(autoincrement())
+  description String
+  createdAt   DateTime         @default(now())
+  // moderator Many:Many
+  modeators   SubForumAdmins[]
+  // Post 1:1
+  posts       Post[]
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // author 1:!
+  authorId      Int
+  author        User           @relation(fields: [authorId], references: [id])
+  // 1:1
+  subForum      SubForum       @relation(fields: [subForumId], references: [id])
+  subForumId    Int
+  // 1:Many
+  postReactions PostReaction[]
+  // 1:Many
+  comments      Comment[]
+}
+
+model PostReaction {
+  id     Int    @id @default(autoincrement())
+  type   String
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+  postId Int
+  post   Post   @relation(fields: [postId], references: [id])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //  post 1:May
+  postId Int
+  post   Post @relation(fields: [postId], references: [id])
+  // user 1:Many
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  // reactions like,dislike reports 1:Many
+  commentReactions CommentReaction[]
+  // self one to many relation
+  commentId Int?
+  origin Comment? @relation("commentReplies", fields: [commentId], references: [id])
+  replies Comment[] @relation("commentReplies")
+}
+
+model CommentReaction {
+  id     Int    @id @default(autoincrement())
+  type   String
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id])
+}
