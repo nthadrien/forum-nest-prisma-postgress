@@ -1,1 +1,0 @@
-# forum-nest-prisma-postgress
