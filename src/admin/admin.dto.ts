@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsBoolean } from "class-validator";
+import { IsString, IsNotEmpty, IsEmail, IsBoolean, IsNumber, IsOptional } from "class-validator";
 
 
 export class LoginDto {
@@ -16,28 +16,45 @@ export enum AdminRoles {
     Admin = 'super-admin'
 }
 
-export class UpdateDto {
+export class CreateAdminDto {
 
     @IsEmail()
     @IsNotEmpty()
     email: string;
 
     @IsString()
-    @IsNotEmpty()
     username: string;
 
     @IsString()
-    @IsNotEmpty()
-    role: AdminRoles[];
+    role: AdminRoles;
 
     @IsString()
-    @IsNotEmpty()
     hash: string;
 
     @IsString()
-    @IsNotEmpty()
     description: string;
 
     @IsBoolean()
     online: true;
+}
+
+export class UpdateAdminDto {
+
+    @IsEmail()
+    email?: string;
+
+    @IsString()
+    username?: string;
+
+    @IsString()
+    role?: AdminRoles;
+
+    @IsString()
+    hash?: string;
+
+    @IsString()
+    description?: string;
+
+    @IsBoolean()
+    online?: true;
 }

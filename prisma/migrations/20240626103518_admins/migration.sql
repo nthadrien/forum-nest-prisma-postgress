@@ -1,29 +1,40 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "Admin" (
+    "id" SERIAL NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "hash" TEXT NOT NULL,
+    "description" TEXT,
+    "online" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-  - You are about to drop the column `userEmail` on the `Profile` table. All the data in the column will be lost.
-  - A unique constraint covering the columns `[email]` on the table `Admin` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[userId]` on the table `Profile` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `email` to the `Admin` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `userId` to the `Profile` table without a default value. This is not possible if the table is not empty.
+    CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userEmail_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "hash" TEXT NOT NULL,
+    "online" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "warnings" INTEGER NOT NULL DEFAULT 0,
+    "profileId" INTEGER,
 
--- DropIndex
-DROP INDEX "Profile_userEmail_key";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
--- AlterTable
-ALTER TABLE "Admin" ADD COLUMN     "email" TEXT NOT NULL;
+-- CreateTable
+CREATE TABLE "Profile" (
+    "id" SERIAL NOT NULL,
+    "aboutMe" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
 
--- AlterTable
-ALTER TABLE "Profile" DROP COLUMN "userEmail",
-ADD COLUMN     "userId" INTEGER NOT NULL;
-
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "warnings" INTEGER NOT NULL DEFAULT 0,
-ALTER COLUMN "online" SET DEFAULT true;
+    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "SubForumAdmins" (
@@ -90,8 +101,24 @@ CREATE TABLE "CommentReaction" (
     CONSTRAINT "CommentReaction_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Admin_username_key" ON "Admin"("username");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
@@ -131,3 +158,6 @@ ALTER TABLE "CommentReaction" ADD CONSTRAINT "CommentReaction_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "CommentReaction" ADD CONSTRAINT "CommentReaction_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
