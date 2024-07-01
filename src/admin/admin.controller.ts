@@ -1,7 +1,7 @@
 import { Controller, Post , Delete, Get, HttpCode, Body, HttpStatus } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { AdminService } from './admin.service';
-import { AdminRoles, LoginDto, UpdateDto } from './admin.dto';
+import { AdminRoles, LoginDto } from './admin.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
 
@@ -23,8 +23,8 @@ export class AdminController {
 
     @HttpCode(HttpStatus.CREATED)
     @Post('register')
-    async AdminRegistration(@Body() signInDto: UpdateDto  ) {
-        return await this.adminService.AddAdmin(signInDto);
+    async AdminRegistration(@Body() signInDto: any  ) {
+        return await this.adminService.DeleteAccounts(signInDto);
     }
 
     @Roles(AdminRoles.Admin)
@@ -38,7 +38,7 @@ export class AdminController {
     @Roles(AdminRoles.Admin)
     @Post('ban-admins')
     async BanAdmins (@Body() dto:string[]): Promise<any> {
-        return await this.adminService.BanAdmins(dto);
+        return await this.adminService.BanAccounts(dto);
     }
 
     @Roles(AdminRoles.Admin)
